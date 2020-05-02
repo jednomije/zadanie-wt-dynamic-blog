@@ -83,9 +83,9 @@
 </script>
 
 <script id="template-opinions" type="text/template">
-    <article  id="commentsContainer">
         <h2>Visitor Opinions</h2>
         {{#.}}
+        <article  id="commentsContainer">
         <section>
             <h3>{{name}} <i>{{createdDate}}</i></h3>
             <p>Posted from {{browser}}.</p>
@@ -95,13 +95,13 @@
             <img class="commentImage" src="{{image}}">
             <p>Keywords:{{keywords}}</p>
         </section>
+        </article>
         {{/.}}
         {{^.}}
         <section>
             Sorry, no opinions found.
         </section>
         {{/.}}
-    </article>
 </script>
 
 <script id="template-addOpinion" type="text/template">

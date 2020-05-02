@@ -1,11 +1,3 @@
-let comments=[];
-
-if(localStorage.myWebSiteComments){
-    comments=JSON.parse(localStorage.myComments);
-}
-
-console.log(comments);
-
 function processGetData(event) {
     event.preventDefault();
 
@@ -35,19 +27,39 @@ function processGetData(event) {
             rating: radio[0],
             browser: browser,
             keywords: keywords,
-            created: new Date()
         };
+    console.log(newComment);
 
+    const init={
+        headers: {
+            "X-Parse-Application-Id": "TaPijjQgI8wc4aHEz2S97gDnC70i2twABa9wDiOA",
+            "X-Parse-REST-API-Key": "BcFahHRXTlvnwv0aEDrI8zItD9taW0rZisg1wvWo",
+            "Content-Type": "application/json"
+        },
+        method: 'POST',
+        body: JSON.stringify(newComment)
+    };
+    const url="https://parseapi.back4app.com/classes/opinions";
+    fetch(url,init)
+        .then(response => {      //fetch promise fullfilled (operation completed successfully)
+            if (response.ok) {    //successful execution includes an error response from the server. So we have to check the return status of the response here.
+                return response.json(); //we return a new promise with the response data in JSON to be processed
+            } else { //if we get server error
+                return Promise.reject(new Error(`Server answered with ${response.status}: ${response.statusText}.`)); //we return a rejected promise to be catched later
+            }
+        })
+        .then(responseJSON => { //here we process the returned response data in JSON ...
+            window.alert("new article successfully saved on server");
+        })
+        .catch(error => { ////here we process all the failed promises
+            window.alert(`Failed to save new article on server. ${error}`);
+
+        })
     console.log("New opinion:\n " + JSON.stringify(newComment));
-
-    comments.push(newComment);
-
-    localStorage.myComments = JSON.stringify(comments);
 
     error.innerHTML="<p>Your comment has been stored.<\p>";
 
     console.log("New opinion added");
-    console.log(comments);
 
     form.reset();
 }

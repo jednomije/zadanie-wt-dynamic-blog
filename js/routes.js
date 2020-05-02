@@ -76,26 +76,43 @@ function opinionForm(targetElm) {
 }
 
 function createHtml4opinions(targetElm){
-    const commentsFromStorage=localStorage.myComments;
-    let comments=[];
+    const init={
+        headers: {
+            "X-Parse-Application-Id": "TaPijjQgI8wc4aHEz2S97gDnC70i2twABa9wDiOA",
+            "X-Parse-REST-API-Key": "BcFahHRXTlvnwv0aEDrI8zItD9taW0rZisg1wvWo",
+            "Content-Type": "application/json"
+        },
+        method: 'GET'
+    };
+    const url="https://parseapi.back4app.com/classes/opinions";
 
-    if(commentsFromStorage) {
-        comments = JSON.parse(commentsFromStorage);
-        comments.forEach(comment => {
-            comment.created = (new Date(comment.created)).toDateString();
-            comment.ratingMessage = comment.rating ? "I will return to this page." : "Sorry, one visit was enough.";
-            comment.platformMessage = comment.phone ? "handheld." : "desktop.";
-        });
-    }
-    document.getElementById(targetElm).innerHTML = Mustache.render(
-        document.getElementById("template-opinions").innerHTML,
-        comments
-    );
+    fetch(url,init)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return Promise.reject(new Error(`Server answered with ${response.status}: ${response.statusText}.`));
+            }
+        })
+        .then(responseJSON => {
+            responseJSON.results.createdOn = (new Date(responseJSON.results.createdOn)).toDateString();
+            responseJSON.results.ratingMessage = responseJSON.results.rating ? "I will return to this page." : "Sorry, one visit was enough.";
+            responseJSON.results.platformMessage = responseJSON.results.phone ? "handheld." : "desktop.";
+            document.getElementById(targetElm).innerHTML = Mustache.render(
+                document.getElementById("template-opinions").innerHTML,
+                responseJSON.results
+            );
+            window.alert("opinion successfully got from the server.");
+        })
+        .catch(error => {
+            window.alert(`Failed to get opinion from server. ${error}`);
+
+        })
 }
 
 function createHtml4Main(targetElm,newCurr){
     const url = `${urlBase}/article?tag=htmlBlog&max=20`;
-    let current=1,totalCount=1;
+    let current=Number(1),totalCount=Number(1);
     fetch(url)  //there may be a second parameter, an object wih options, but we do not need it now.
         .then(response =>{
             if(response.ok){
@@ -305,7 +322,7 @@ function fetchAndProcessArticle(targetElm, artIdFromHash, offsetFromHash, totalC
                     `processCommAddFrmData(event,${artIdFromHash},${offsetFromHash},${totalCountFromHash},'${urlBase}')`;
                 responseJSON.submitBtTitle="Save comment";
                 responseJSON.urlBase=urlBase;
-                responseJSON.backLink=`#article/${artIdFromHash}/${offsetFromHash}/${totalCountFromHash}`;
+                responseJSON.backLink=`#articles/${offsetFromHash}`;
                 responseJSON.author=getName();
                 document.getElementById(targetElm).innerHTML =
                     Mustache.render(
