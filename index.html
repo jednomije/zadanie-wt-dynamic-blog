@@ -1,0 +1,287 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="google-signin-client_id" content="1029678842004-cgp7r7hb11lbl8qm0t5cg7576944sea5.apps.googleusercontent.com">
+    <meta name="author" content="Lubomir Kollar" />
+    <link rel="stylesheet" href="css/main.css" />
+
+
+    <title>HTML</title>
+</head>
+
+<body>
+<header class="menu">
+    <h1>HTML</h1>
+<div>
+    <a class="button" href="#welcome">Welcome!</a>
+    <a class="button" href="#articles">Articles</a>
+    <a class="button" href="#artInsert">Add new article</a>
+    <a class="button" href="#opinions">Visitor opinions</a>
+    <a class="button" href="#addOpinion">Add your opinion</a>
+    <div id="googleSignIn">
+        <div id="SignInButton"></div>
+        <div id="SignedIn">
+            Ste prihlásený ako (You are signed in as) <span id="googleUserName"></span> <button onclick="signOut()">Odhlásiť sa / Sign Out</button>
+        </div>
+    </div>
+</div>
+</header>
+<main id="router-view">
+
+</main>
+
+<footer>
+    <p>Posted by Ľubomír Kollár on 25th of February 2020</p>
+    <p>Contact information: <a href="mailto:lubomir.kollar@student.tuke.sk">
+        lubomir.kollar@student.tuke.sk</a>.</p>
+</footer>
+
+<script id="template-welcome" type="text/template">
+    <div>
+        <h2>Description</h2>
+        <p>Hypertext Markup Language (HTML) is the standard markup language for documents designed to be displayed in a web browser.
+            It can be assisted by technologies such as Cascading Style Sheets (CSS) and scripting languages such as JavaScript.</p>
+    </div>
+</script>
+
+<script id="template-articles" type="text/template">
+    {{#.}}
+    <article>
+        <h2><a href="{{detailLink}}">{{title}}</a></h2>
+        <div>
+            {{{content}}}
+        </div>
+        <p>
+            by {{author}}
+        </p>
+    </article>
+    {{/.}}
+    <div  class="navigation">
+        <p>
+            Displaying page {{currPage}} of {{pageCount}} pages.
+        </p>
+        <nav>
+            {{#prevPage}}
+            <a href="#articles/{{prevPage}}" class="button"><< Previous page</a>
+            {{/prevPage}}
+            {{#nextPage}}
+            <a href="#articles/{{nextPage}}" class="button">Next page >></a>
+            {{/nextPage}}
+        </nav>
+    </div>
+</script>
+
+<script id="template-articles-error" type="text/template">
+
+    <article>
+        <h2>Articles acquisition failed</h2>
+        <p>
+            {{errMessage}}
+        </p>
+    </article>
+</script>
+
+<script id="template-opinions" type="text/template">
+    <article  id="commentsContainer">
+        <h2>Visitor Opinions</h2>
+        {{#.}}
+        <section>
+            <h3>{{name}} <i>{{createdDate}}</i></h3>
+            <p>Posted from {{browser}}.</p>
+            <p>Sent from {{platformMessage}}</p>
+            <p>{{comment}}</p>
+            <p>{{ratingMessage}}</p>
+            <img class="commentImage" src="{{image}}">
+            <p>Keywords:{{keywords}}</p>
+        </section>
+        {{/.}}
+        {{^.}}
+        <section>
+            Sorry, no opinions found.
+        </section>
+        {{/.}}
+    </article>
+</script>
+
+<script id="template-addOpinion" type="text/template">
+    <div  class="divForm">
+        <h2>Your Opinion</h2>
+        <p>
+            Please, use the form below to state your opinion about this page.
+        </p>
+        <form id="form" onsubmit="processGetData(event)">
+                <div>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" value="{{author}}" required>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                    <label for="image">Url of an image:</label>
+                    <input type="url" id="image">
+                    <label for="keywords">Keywords:</label>
+                    <input type="text" id="keywords">
+                    <label for="browser">What kind of browser do you use?</label>
+                    <input list="browsers" id="browser">
+                    <datalist id="browsers">
+                        <option value="Internet Explorer">
+                        <option value="Firefox">
+                        <option value="Chrome">
+                        <option value="Opera">
+                        <option value="Safari">
+                        <option value="Other">
+                    </datalist>
+                </div>
+                <div>
+                    <label for="thumbsUp" >Click here if you liked the site.</label>
+                    <input type="radio" id="thumbsUp" name="rating">
+                    <label for="thumbsDown">Click here if you did not.</label>
+                    <input type="radio" id="thumbsDown" name="rating">
+                    <label for="phone">Check this if you're on a handheld.</label>
+                    <input type="checkbox" id="phone" value="true false"><br>
+                    <textarea id="comment" required>Comment here!</textarea><br>
+                    <button type="submit" id="submitComment">submit</button>
+                    <button type="reset" id="resetComment">reset</button>
+                </div>
+                <div id="error"></div>
+            </form>
+    </div>
+</script>
+
+<script id="template-article" type="text/template">
+<div>
+    <article>
+        <h3>{{title}}</h3>
+        <p>
+            by {{author}}
+        </p>
+        {{#imageLink}}
+        <figure>
+            <img src="{{imageLink}}" alt="article figure" />
+        </figure>
+        {{/imageLink}}
+        <div>{{{content}}}</div>
+        <p>
+            Keywords:
+            {{tags}}
+        </p>
+    </article>
+
+    {{#comments}}
+    <div>
+        <h3>{{{author}}}</h3>
+        <li>{{{text}}}</li>
+    </div>
+    {{/comments}}
+
+    <a href="{{addCommentLink}}" class="commentButton">addComment</a>
+
+    <div class="navigation">
+        <a href="{{backLink}}" class="button"><< Back</a>
+        <a href="{{editLink}}" class="button">Edit</a>
+        <a href="{{deleteLink}}" class="button">Delete</a>
+    </div>
+</div>
+
+<div id="comment-form" {{hidden}}>
+    <div class="divForm">
+
+        <h2>{{formTitle}}</h2>
+        <br><br>
+
+        <form id="commentForm" onsubmit="return {{formSubmitCall}}">
+            <label for="commentAuthor">Author:</label>
+            <input type="text" name="author" id="commentAuthor" value="{{author}}" size="50" title="comment author, max. length 100 characters." maxlength="100" placeholder="e.g. Ján Trieska" />
+            <label for="text">Article content:</label>
+            <textarea
+                    name="text" id="text" spellcheck="true" lang="sk"
+                    cols="50" rows="20" required
+                    title="Comment text, mandatory item, can be plain text or in HTML.">{{text}}</textarea>
+            <br>
+            <button type="reset">
+                Reset Form
+            </button>
+            <button type="submit">
+                {{submitBtTitle}}
+            </button>
+
+        </form>
+    </div>
+    <div class="navigation">
+        <a href="{{backLink}}" class="button"><< Back</a>
+    </div>
+</div>
+
+</script>
+
+
+
+<script id="template-article-form" type="text/template">
+    <div class="divForm">
+
+        <h2>{{formTitle}}</h2>
+        <br><br>
+
+        <form id="articleForm" onsubmit="return {{formSubmitCall}}">
+            <label for="author">Author:</label>
+            <input type="text" name="author" id="author" value="{{author}}" size="50" title="Article author, max. length 100 characters." maxlength="100" placeholder="e.g. Ján Trieska" />
+            <br>
+            <label for="title">Title:</label>
+            <input type="text" name="title" id="title" value="{{title}}" size="50"  maxlength="100" pattern="\S[\S\s]*" required title="Article title, mandatory item, max. length: 100 characters, the first character must not be a space." placeholder="e.g. My story." />
+            <br>
+            <label for="imageLink">Image (url):</label>
+            <input type="url" name="imageLink" id="imageLink" value="{{imageLink}}" size="50" title="Image URL, max. length 100 characters." maxlength="100"/>
+            <br>
+            <label></label><button type="button" id="btShowFileUpload" onclick="showFileUpload()">Upload image</button>
+
+            <fieldset class="added hiddenElm" id="fsetFileUpload">
+                <legend>Image Upload</legend>
+                <input type="file" id="flElm" name="file" accept="image/jpeg, image/png"/>
+                <br />
+                <button type="button" id="btFileUpload" onclick="uploadImg('{{urlBase}}')">Send image to server</button>
+                <button type="button" id="btCancelFileUpload" onclick="cancelFileUpload()">Cancel uploading</button>
+            </fieldset>
+
+
+            <br>
+            <label for="content">Article content:</label>
+            <textarea
+                    name="content" id="content" spellcheck="true" lang="sk"
+                    cols="50" rows="20" required
+                    title="Article content, mandatory item, can be plain text or in HTML.">{{content}}</textarea>
+            <br>
+            <label for="tags">Keywords:</label>
+            <input  type="text" name="tags" id="tags" value="{{tags}}" size="50"
+                    title="Keyword list, comma separated." placeholder="e.g. village, drama" />
+
+            <br>
+            <br>
+            <button type="reset">
+                Reset Form
+            </button>
+            <button type="submit">
+                {{submitBtTitle}}
+            </button>
+
+        </form>
+
+    </div>
+
+    <div class="navigation">
+        <a href="{{backLink}}" class="button"><< Back</a>
+    </div>
+</script>
+
+<script src="js/mustache.min.js"></script>
+
+<script src="js/formHandler.js"></script>
+
+<script src="js/handleArticleForms.js"></script>
+
+<script type="module" src="js/routerInit.js"></script>
+
+<script src="https://apis.google.com/js/platform.js?onload=startGSingIn" async defer></script>
+
+<script src="js/googleSingin.js"></script>
+
+</body>
+</html>
