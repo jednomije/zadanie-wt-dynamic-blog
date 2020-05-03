@@ -111,17 +111,7 @@ a.button{
 }
 
 a.commentButton{
-    transition: background-color 1s ease-out;
     background-color: yellowgreen;
-    margin-top:7px;
-    padding: 5px;
-    border: 2px solid black;
-    border-top-color: white;
-    border-left-color:white;
-    border-radius: 5px;
-    text-decoration: none;
-    color: black;
-    float: left;
 }
 
 a:link.button{

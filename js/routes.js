@@ -110,6 +110,23 @@ function createHtml4opinions(targetElm){
         })
 }
 
+function createHtml4Main2(targetElm,newCurr){
+    let current=newCurr,totalCount;
+    const data4rendering = {
+        currPage: current,
+    };
+
+    if (current > 1) {
+        data4rendering.prevPage = current - 1;
+    }
+
+    if (current < totalCount) {
+        data4rendering.nextPage = current + 1;
+    }
+
+    fetchAndProcessArticle(targetElm, data4rendering, (current - 1) * 5, totalCount*5);
+}
+
 function createHtml4Main(targetElm,newCurr){
     const url = `${urlBase}/article?tag=htmlBlog&max=20`;
     let current=Number(1),totalCount=Number(1);
@@ -229,10 +246,11 @@ function fetchAndDisplayArticles(targetElm, data, offsetFromHash, totalCountFrom
                 article =>(
                     {
                         ...article,
-                        detailLink:`#article/${article.id}/${responseJSON.offset}/${responseJSON.totalCount}`
+                        detailLink:`#article/${article.id}/${responseJSON.offset}/${responseJSON.totalCount}/1`
                     }
                 )
-            );responseJSON.currPage=data.currPage;
+            );
+        responseJSON.currPage=data.currPage;
         responseJSON.prevPage=data.prevPage;
         responseJSON.nextPage=data.nextPage;
         responseJSON.pageCount=data.pageCount;
@@ -244,8 +262,22 @@ function fetchAndDisplayArticles(targetElm, data, offsetFromHash, totalCountFrom
     }
 }
 
-function fetchAndDisplayArticleDetail(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash) {
-    fetchAndProcessArticle(...arguments,false,false);
+function fetchAndDisplayArticleDetail(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash,newCurr,commentForm) {
+    let current=Number(newCurr),totalCount=Number(6);
+    console.log(newCurr);
+    const data4rendering = {
+        currPage: current,
+        pageCount: totalCount
+    };
+
+    if (current > 1) {
+        data4rendering.prevPage = current - 1;
+    }
+
+    if (current < totalCount) {
+        data4rendering.nextPage = current + 1;
+    }
+    fetchAndProcessArticle(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash,data4rendering,false,commentForm);
 }
 
 function newArticleForm(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash) {
@@ -265,7 +297,7 @@ function newArticleForm(targetElm, artIdFromHash, offsetFromHash, totalCountFrom
                 `processArtAddFrmData(event,${artIdFromHash},${offsetFromHash},${totalCountFromHash},'${urlBase}')`;
             responseJSON.submitBtTitle = "Save article";
             responseJSON.urlBase = urlBase;
-            responseJSON.backLink = `#article/${artIdFromHash}/${offsetFromHash}/${totalCountFromHash}`;
+            responseJSON.backLink = `#articles/${(offsetFromHash/20)}/${(totalCountFromHash/20)}`;
 
             document.getElementById(targetElm).innerHTML =
                 Mustache.render(
@@ -275,9 +307,12 @@ function newArticleForm(targetElm, artIdFromHash, offsetFromHash, totalCountFrom
         });
 }
 
-function fetchAndProcessArticle(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash,forEdit,commentForm) {
+function fetchAndProcessArticle(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash,data,forEdit,commentForm) {
     const url = `${urlBase}/article/${artIdFromHash}`;
-    const urlComm=`${urlBase}/article/${artIdFromHash}/comment`;
+    let urlComm;
+        if (forEdit){
+            urlComm=`${urlBase}/article/${artIdFromHash}/comment?max=5`;
+        }else urlComm=`${urlBase}/article/${artIdFromHash}/comment?max=5&offset=${(data.currPage-1)*5}`;
     let comment;
     fetch(urlComm)
         .then(response =>{
@@ -303,7 +338,7 @@ function fetchAndProcessArticle(targetElm, artIdFromHash, offsetFromHash, totalC
                     `processArtEditFrmData(event,${artIdFromHash},${offsetFromHash},${totalCountFromHash},'${urlBase}')`;
                 responseJSON.submitBtTitle="Save article";
                 responseJSON.urlBase=urlBase;
-                responseJSON.backLink=`#article/${artIdFromHash}/${offsetFromHash}/${totalCountFromHash}`;
+                responseJSON.backLink=`#article/${artIdFromHash}/${offsetFromHash}/${totalCountFromHash}/1`;
                 document.getElementById(targetElm).innerHTML =
                     Mustache.render(
                         document.getElementById("template-article-form").innerHTML,
@@ -311,12 +346,17 @@ function fetchAndProcessArticle(targetElm, artIdFromHash, offsetFromHash, totalC
                     );
             }else{
                 if(!commentForm)responseJSON.hidden="hidden";
+                responseJSON.prevPage=`#article/${responseJSON.id}/${offsetFromHash}/${totalCountFromHash}/${data.prevPage}`;
+                responseJSON.nextPage=`#article/${responseJSON.id}/${offsetFromHash}/${totalCountFromHash}/${data.nextPage}`;
+                responseJSON.currPage=data.currPage;
+                responseJSON.pageCount=data.pageCount;
                 responseJSON.tags.shift();
                 responseJSON.addCommentLink=`#addComment/${responseJSON.id}/${offsetFromHash}/${totalCountFromHash}`;
                 responseJSON.backLink=`#articles/${(offsetFromHash/20)}/${(totalCountFromHash/20)}`;
                 responseJSON.editLink=`#artEdit/${responseJSON.id}/${offsetFromHash}/${totalCountFromHash}`;
                 responseJSON.deleteLink=`#artDelete/${responseJSON.id}/${offsetFromHash}/${totalCountFromHash}`;
                 responseJSON.comments=comment;
+                console.log(comment);
                 responseJSON.formTitle="Add comment";
                 responseJSON.formSubmitCall =
                     `processCommAddFrmData(event,${artIdFromHash},${offsetFromHash},${totalCountFromHash},'${urlBase}')`;
@@ -343,11 +383,11 @@ function fetchAndProcessArticle(targetElm, artIdFromHash, offsetFromHash, totalC
 }
 
 function commentForm(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash) {
-    fetchAndProcessArticle(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash,false,true);
+    fetchAndDisplayArticleDetail(...arguments,1,true);
 }
 
 function editArticle(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash) {
-    fetchAndProcessArticle(...arguments,true);
+    fetchAndProcessArticle(...arguments,0,true,false);
 }
 
 function addArticle(targetElm, artIdFromHash, offsetFromHash, totalCountFromHash) {

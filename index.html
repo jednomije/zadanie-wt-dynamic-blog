@@ -172,10 +172,22 @@
         <li>{{{text}}}</li>
     </div>
     {{/comments}}
-
-    <a href="{{addCommentLink}}" class="commentButton">addComment</a>
+    <div  class="navigation">
+        <p>
+            Displaying page {{currPage}} of {{pageCount}} pages.
+        </p>
+        <nav>
+            {{#prevPage}}
+            <a href="{{prevPage}}" class="button"><< Previous page</a>
+            {{/prevPage}}
+            {{#nextPage}}
+            <a href="{{nextPage}}" class="button">Next page >></a>
+            {{/nextPage}}
+        </nav>
+    </div>
 
     <div class="navigation">
+        <a href="{{addCommentLink}}" class="commentButton button">addComment</a>
         <a href="{{backLink}}" class="button"><< Back</a>
         <a href="{{editLink}}" class="button">Edit</a>
         <a href="{{deleteLink}}" class="button">Delete</a>
